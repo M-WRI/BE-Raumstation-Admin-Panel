@@ -1,17 +1,31 @@
-import express, { Express, Request, Response } from "express";
+import express, { Express } from "express";
+import { ApolloServer } from "apollo-server-express";
+import { getSchema } from "./graphql/schema";
 import dotenv from "dotenv";
 
 dotenv.config();
 
-const app: Express = express();
-const port = process.env.PORT;
+// ======
+// SERVER
+// ======
+const main = async () => {
+  const app: Express = express();
 
-app.get("/", (req: Request, res: Response) => {
-  res.json({
-    message: "here we go",
+  const schema = getSchema();
+  const apolloServer = new ApolloServer({
+    schema,
   });
-});
 
-app.listen(port, () => {
-  console.log(`App is listening on port: ${port}`);
+  await apolloServer.start();
+  apolloServer.applyMiddleware({ app });
+
+  const port = process.env.PORT;
+
+  app.listen(port, () => {
+    console.log(`App is listening on port: ${port}`);
+  });
+};
+
+main().catch((err) => {
+  console.log(err);
 });
